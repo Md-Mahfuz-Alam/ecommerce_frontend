@@ -1,0 +1,49 @@
+@import '/public/variables/colors.scss';
+
+.appNavbar {
+  background-color: $cyan-900;
+  height: 54px;
+  display: flex;
+  align-items: center;
+
+  
+}
+
+.navbar {
+  background-color: $cyan-900;
+  display: flex;
+  justify-content: space-between;
+
+  > li {
+    padding-left: 30px !important;
+    padding-right: 20px !important;
+    font-size: large;
+  }
+  .activeMenuItem {
+    background-color: rgb(205, 19, 19);
+  }
+ 
+}
+.navbar > li:active{
+  background-color: rgb(205, 19, 19);
+}
+
+.logo {
+  padding-left: 24px !important;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  padding-left: 0 !important;
+}
+
+.accountMenu {
+  ul {
+    align-items: center;
+    width: 120px;
+    border-radius: 0 !important;
+    top: 7px;
+    text-align: center;
+  }
+}
