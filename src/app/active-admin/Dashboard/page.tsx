@@ -1,4 +1,3 @@
-'use-client'
 import { Card } from "antd";
 import styles from "./index.module.scss";
 import Link from "next/link";
