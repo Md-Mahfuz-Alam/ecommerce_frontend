@@ -1,10 +1,13 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Button, Modal, Table } from "antd";
+import { Button, Row, Col, Popconfirm, Table } from "antd";
 import { ColumnsType } from "antd/es/table";
-import Link from "next/link";
-import { EditOutlined } from "@ant-design/icons";
-import Sidemenu from "@/app/components/Sidemenu";
+import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import CreateUpdateCategoriesModal from "./new";
+import axios from "axios";
+import { initialValues } from "./new/formikHelper";
+
+import styles from "./index.module.scss";
 
 interface DataType {
   key: string;
@@ -29,7 +32,14 @@ const columns: ColumnsType<any> = [
 
 function Category() {
   const [categories, setCategories] = useState<DataType[]>([]);
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isCreateCategoryModalOpen, setIsCreateCategoryModalOpen] =
+    useState(false);
+  const [isDeleteConfirmationVisible, setIsDeleteConfirmationVisible] =
+    useState(false);
+  const [isUpdateCategoryModalOpen, setIsUpdateCategoryModalOpen] =
+    useState(false);
+  const [categoryId, setCategoryId] = useState("");
+  const [category, setCategory] = useState<DataType | null>(null);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -46,10 +56,61 @@ function Category() {
     };
 
     fetchCategories();
-  }, [categories]);
+  }, []);
 
-  const isModalVisible = () => {
-    setIsFormOpen(true);
+  const handleCreateCategory = () => {
+    setIsCreateCategoryModalOpen(true);
+  };
+
+  const handleCreate = async (formData: DataType) => {
+    console.log("create is clicked");
+    try {
+      await axios.post("http://localhost:3000/api/v1/categories", formData);
+    } catch (error) {
+      console.log("Error creating category", error);
+    }
+    setIsCreateCategoryModalOpen(false);
+  };
+
+  const openEditCategoryModal = async (category: DataType) => {
+    setCategoryId(category.id);
+    setCategory(category);
+    setIsUpdateCategoryModalOpen(true);
+  };
+
+  const handleUpdate = async (formData: DataType) => {
+    try {
+      await axios.put(
+        `http://localhost:3000/api/v1/categories/${categoryId}`,
+        formData
+      );
+      setIsUpdateCategoryModalOpen(false);
+    } catch (error) {
+      console.error("Error Submitting Form", error);
+    }
+  };
+
+  const openDeleteCategoryPop = () => {
+    setIsDeleteConfirmationVisible(true);
+  };
+
+  const handleDeleteCategory = (category: DataType) => {
+    const deleteCategory = async () => {
+      try {
+        await axios.delete(
+          `http://localhost:3000/api/v1/categories/${category.id}`
+        );
+        const updatedCategories = categories.filter(
+          (cat) => cat.id !== category.id
+        );
+        setCategories(updatedCategories);
+        setIsDeleteConfirmationVisible(false);
+      } catch (error) {
+        console.error("Error in deleting category", error);
+      }
+    };
+
+    return deleteCategory;
   };
 
   const data: DataType[] = categories.map((category) => ({
@@ -58,23 +119,56 @@ function Category() {
     name: category.name,
     action: (
       <div>
-        <Button onClick={isModalVisible}>
+        <Button onClick={() => openEditCategoryModal(category)}>
           <EditOutlined />
         </Button>
+        <Popconfirm
+          title="Delete Category"
+          placement="topRight"
+          description="Are you sure to delete this category?"
+          onConfirm={handleDeleteCategory(category)}
+          okText="Yes"
+          cancelText="Cancel"
+        >
+          <Button
+            type="link"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={openDeleteCategoryPop}
+          />
+        </Popconfirm>
       </div>
     ),
   }));
 
   return (
-    <div>
+    <div className={styles.category}>
+      <Row>
+        <Col span={14}>
+          <h1>Categories</h1>
+        </Col>
+        <Col span={10}>
+          <PlusOutlined
+            onClick={handleCreateCategory}
+            className={styles.createIcon}
+          />
+        </Col>
+      </Row>
       <Table columns={columns} dataSource={data} />
-      <Modal
-        title="Basic Modal"
-        open={isFormOpen}
-        onCancel={() => setIsFormOpen(false)}
-      >
-        <p>Some contents...</p>
-      </Modal>
+      <CreateUpdateCategoriesModal
+        isOpen={isCreateCategoryModalOpen}
+        onCancel={() => setIsCreateCategoryModalOpen(false)}
+        initialValues={initialValues(null)}
+        handleSubmit={handleCreate}
+        title="Create New Category"
+      />
+      <CreateUpdateCategoriesModal
+        isOpen={isUpdateCategoryModalOpen}
+        onCancel={() => setIsUpdateCategoryModalOpen(false)}
+        initialValues={category ? initialValues(category) : null}
+        handleSubmit={handleUpdate}
+        title="Edit Category"
+      />
     </div>
   );
 }

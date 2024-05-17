@@ -19,9 +19,7 @@ interface Category {
 }
 
 const Navbar = () => {
-  
   const [categories, setCategories] = useState<Category[]>([]);
-
 
   const userAccountMenu: MenuProps["items"] = [
     {
@@ -32,13 +30,11 @@ const Navbar = () => {
     //   key: 'logout',
     //   label: <span onClick={handleLogout}>Logout</span>,
     // },
-    
   ];
   useEffect(() => {
-    const fetchCategories =  async () => {
+    const fetchCategories = async () => {
       const response = await fetch("http://localhost:3000/api/v1/categories");
       const data = await response.json();
-      console.log(data);
       setCategories(data);
     };
 
@@ -46,23 +42,14 @@ const Navbar = () => {
   }, []);
 
   const menuItems = categories.map((category) => ({
-    key: category.id, 
-    label: (
-        <Link href={category.name}>
-          {category.name}
-        </Link>
-      ),
-    
+    key: category.id,
+    label: <Link href={category.name}>{category.name}</Link>,
   }));
   //
   menuItems.push({
-    key: categories.length+1,
-    label:  (
-        <Link href={'active-admin'}>
-          Master
-        </Link>
-      ),
-  })
+    key: categories.length + 1,
+    label: <Link href={"/active-admin/dashboard"}>Master</Link>,
+  });
   return (
     <div>
       <Row gutter={24} className={styles.appNavbar}>
