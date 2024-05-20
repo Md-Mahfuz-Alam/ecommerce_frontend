@@ -43,3 +43,10 @@ interface CategoryType {
   id: string;
   name: string;
 }
+
+interface UserType {
+  id: string;
+  username: string;
+  email: string;
+  role: string;
+}

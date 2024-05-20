@@ -1,7 +1,6 @@
 export const initialValues = (product?: ProductType) => {
   if (product) {
     return {
-      id: product.id,
       name: product.name,
       description: product.description,
       price: product.price,

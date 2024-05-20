@@ -22,7 +22,7 @@ const Sidemenu = () => {
           <Link href={"/active-admin/products"} className={styles.link}>
             Products
           </Link>
-          <Link href={""} className={styles.link}>
+          <Link href={"/active-admin/users"} className={styles.link}>
             Users
           </Link>
         </Col>

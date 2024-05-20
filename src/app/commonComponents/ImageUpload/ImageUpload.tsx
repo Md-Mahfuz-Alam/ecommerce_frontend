@@ -1,11 +1,8 @@
-// CustomImageUpload.tsx
 import React, { useState } from "react";
 import { Upload } from "antd";
-import type { GetProp, UploadFile, UploadProps } from "antd";
+import type { UploadFile, UploadProps } from "antd";
 import ImgCrop from "antd-img-crop";
 import { useField, useFormikContext } from "formik";
-
-type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
 interface CustomImageUploadProps {
   name: string;
@@ -13,10 +10,6 @@ interface CustomImageUploadProps {
   defaultFileList?: UploadFile[];
   onChange?: UploadProps["onChange"];
   onPreview?: (file: UploadFile) => void;
-}
-
-interface onChangeProps extends UploadProps {
-  value: File;
 }
 
 const ImageUpload: React.FC<CustomImageUploadProps> = ({
@@ -28,20 +21,19 @@ const ImageUpload: React.FC<CustomImageUploadProps> = ({
 }) => {
   const [fileList, setFileList] = useState<UploadFile[]>(defaultFileList);
   const [field] = useField(name);
-  const formik = useFormikContext();
+  const { setFieldValue } = useFormikContext();
 
-  const handleOnChange: onChangeProps["onChange"] = ({
+  const handleOnChange: UploadProps["onChange"] = ({
     file,
-
     fileList: newFileList,
   }) => {
-    if (file && !file.originFileObj) {
-      setFileList(newFileList);
-    } else {
-      setFileList(newFileList);
-      if (onChange) {
-        onChange({ file, fileList: newFileList });
-      }
+    setFileList(newFileList);
+    setFieldValue(
+      name,
+      newFileList.map((file) => file)
+    );
+    if (onChange) {
+      onChange({ file, fileList: newFileList });
     }
   };
 
@@ -50,7 +42,7 @@ const ImageUpload: React.FC<CustomImageUploadProps> = ({
     if (!src) {
       src = await new Promise((resolve) => {
         const reader = new FileReader();
-        reader.readAsDataURL(file.originFileObj as FileType);
+        reader.readAsDataURL(file.originFileObj as File);
         reader.onload = () => resolve(reader.result as string);
       });
     }
@@ -71,10 +63,7 @@ const ImageUpload: React.FC<CustomImageUploadProps> = ({
           {...field}
           listType="picture-card"
           fileList={fileList}
-          onChange={(value) => {
-            handleOnChange(value);
-            formik.setFieldValue(name, value);
-          }}
+          onChange={handleOnChange}
           onPreview={handleOnPreview}
         >
           {fileList.length < 5 && "+ Upload"}

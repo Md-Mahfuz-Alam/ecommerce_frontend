@@ -9,8 +9,7 @@ import { Form, Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import { fetchCategoriesData } from "./fetchCategories";
 import styles from "./index.module.scss";
-// import ImageUpload from "@/app/commonComponents/ImageUpload/ImageUpload";
-import FileUpload from "@/app/commonComponents/ImageUpload/ImageUpload";
+import ImageUpload from "@/app/commonComponents/ImageUpload/ImageUpload";
 
 function AddEditForm({
   isOpen,
@@ -70,7 +69,7 @@ function AddEditForm({
                   label="Category"
                   name="category_id"
                 />
-                <FileUpload label="Upload Product Image: " name="images" />
+                <ImageUpload label="Upload File" name="images" />
               </Col>
               <Col span={24}></Col>
             </Row>

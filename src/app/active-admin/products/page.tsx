@@ -7,6 +7,7 @@ import { initialValues } from "./AddEditForm/formikHelper";
 import AddEditForm from "./AddEditForm";
 import DisplayImages from "../../commonComponents/ShowImages/DisplayImages";
 import axios from "axios";
+import image from "../../../../public/images/New-Hd-Background-Images-Wallpaper-Free-Download-Wallpaperxyz.com-14.jpg";
 
 import styles from "./index.module.scss";
 
@@ -50,7 +51,13 @@ const columns = [
     title: "Images",
     dataIndex: "images",
     key: "images",
-    render: (images: string[]) => <DisplayImages images={images} />,
+    render: (images: string[]) => {
+      return (
+        <DisplayImages
+          images={images && images.length > 0 ? images : [image.src]}
+        />
+      );
+    },
   },
   {
     title: "Action",
@@ -64,7 +71,8 @@ const Products = () => {
   const [products, setProducts] = useState<ProductType[]>([]);
   const [product, setProduct] = useState<ProductType>();
   const [isAddEditFormOpen, setIsAddEditFormOpen] = useState(false);
-
+  const [isDeleteConfirmationVisible, setIsDeleteConfirmationVisible] =
+    useState(false);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -78,26 +86,18 @@ const Products = () => {
   }, []);
 
   const handleCreateUpdate = async (formData: ProductType) => {
-    if (product) {
-      console.log(product)
-      try {
+    try {
+      if (product) {
         await axios.put(
           `http://localhost:3000/api/v1/products/${product.id}`,
           formData
         );
-        setIsAddEditFormOpen(false);
-      } catch (error) {
-        console.log("Error creating category", error);
-      }
-    } else {
-      try {
-        const seller_id = 1;
-        formData = { ...formData, seller_id };
+      } else {
         await axios.post("http://localhost:3000/api/v1/products", formData);
-        setIsAddEditFormOpen(false);
-      } catch (error) {
-        console.log("Error creating category", error);
       }
+      setIsAddEditFormOpen(false);
+    } catch (error) {
+      console.error("Error submitting form", error);
     }
   };
 
@@ -106,6 +106,24 @@ const Products = () => {
     setIsAddEditFormOpen(true);
   };
 
+  const handleDeleteProduct = (product: ProductType) => {
+    const deleteCategory = async () => {
+      try {
+        await axios.delete(
+          `http://localhost:3000/api/v1/products/${product.id}`
+        );
+        // const updatedProducts = products.filter((prod) => prod.id !== prod.id);
+        // setProducts(updatedProducts);
+      } catch (error) {
+        console.error("Error in deleting category", error);
+      }
+    };
+
+    return deleteCategory;
+  };
+  const openDeleteProductPopup = () => {
+    setIsDeleteConfirmationVisible(true);
+  };
   const data = products.map((product) => ({
     key: product.id.toString(),
     id: product.id,
@@ -122,10 +140,10 @@ const Products = () => {
           <EditOutlined />
         </Button>
         <Popconfirm
-          title="Delete Category"
+          title="Delete Product"
           placement="topRight"
-          description="Are you sure to delete this category?"
-          // onConfirm={handleDeleteCategory(category)}
+          description="Are you sure to delete this Product?"
+          onConfirm={handleDeleteProduct(product)}
           okText="Yes"
           cancelText="Cancel"
         >
@@ -133,7 +151,7 @@ const Products = () => {
             type="link"
             danger
             icon={<DeleteOutlined />}
-            // onClick={openDeleteCategoryPop}
+            onClick={openDeleteProductPopup}
           />
         </Popconfirm>
       </div>
