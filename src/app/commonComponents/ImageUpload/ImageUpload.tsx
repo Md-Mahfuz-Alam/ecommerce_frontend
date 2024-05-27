@@ -23,15 +23,16 @@ const ImageUpload: React.FC<CustomImageUploadProps> = ({
   const [field] = useField(name);
   const { setFieldValue } = useFormikContext();
 
-  const handleOnChange: UploadProps["onChange"] = ({
+  const handleOnChange: UploadProps["onChange"] = async ({
     file,
     fileList: newFileList,
   }) => {
     setFileList(newFileList);
-    setFieldValue(
-      name,
-      newFileList.map((file) => file)
-    );
+    
+    // Convert files to blobs and set in Formik
+    const blobs = await Promise.all(newFileList.map(file => toBlob(file)));
+    setFieldValue(name, blobs);
+
     if (onChange) {
       onChange({ file, fileList: newFileList });
     }
@@ -53,6 +54,21 @@ const ImageUpload: React.FC<CustomImageUploadProps> = ({
     if (onPreview) {
       onPreview(file);
     }
+  };
+
+  const toBlob = (file: UploadFile): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsArrayBuffer(file.originFileObj as File);
+      reader.onload = () => {
+        if (reader.result) {
+          resolve(new Blob([reader.result]));
+        } else {
+          reject(new Error("File reading failed"));
+        }
+      };
+      reader.onerror = () => reject(new Error("File reading failed"));
+    });
   };
 
   return (

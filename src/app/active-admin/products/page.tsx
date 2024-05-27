@@ -86,6 +86,7 @@ const Products = () => {
   }, []);
 
   const handleCreateUpdate = async (formData: ProductType) => {
+    console.log(formData);
     try {
       if (product) {
         await axios.put(
